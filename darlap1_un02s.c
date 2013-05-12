@@ -44,7 +44,7 @@ int dl_receive(){
 	int packetSize = 1;
 	int desc;
 	struct sockaddr clientAddress;
-	socklen_t length = sizeof(struct sockaddr);
+	socklen_t length = sizeof(clientAddress);
 	desc = accept(s, &clientAddress, &length);
 
 	if(desc != -1){
@@ -58,12 +58,21 @@ int dl_receive(){
 			if(packetSize > 0)
 				if(buf[0] == 10){
 					printf("Gautas pabaigos signalas\n");
+					shutdown(desc, SHUT_RDWR);
+					close(desc);
 					return 0;
 				}
 		}
+	}else if(errno != EWOULDBLOCK){
+		perror("Klaida priimant klienta\n");
+		printf("ERRNO: %d\n", errno);
+		return 0;
 	}
 	free(buf);
 	printf("Gauta %d baitu\n", bytes);
+	shutdown(desc, SHUT_RDWR);
+	close(desc);
+	usleep(10000);
 	return 1;
 }	
 
@@ -71,6 +80,7 @@ int main(){
 	printf( "(C) 2013 Lapunas Darius, %s\n", __FILE__ );
 	dl_start_server("server");
 	while(dl_receive());
+	unlink("server");
 	dl_exit(0);
 	return 0;
 }
