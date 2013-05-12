@@ -29,17 +29,16 @@ void dl_start_server(char *name){
 		dl_exit(1);
 	}
 
-	sa.sun_family = AF_UNIX;
-	strncpy(sa.sa_data, name, sizeof(sa.sun_path) - 1);
+	sa.sa_family = AF_UNIX;
+	strncpy(sa.sa_data, name, sizeof(sa.sa_data) - 1);
 	if(bind(s, &sa, sizeof(struct sockaddr)) != 0){
 		printf("Bindinant sprogo\n");
 		dl_exit(1);
 	}
-	printf("socket: %d, kelias: %s\n", s, sa.data);
+	printf("socket: %d, kelias: %s\n", s, sa.sa_data);
 }
 
 int dl_receive(){
-	int rv;
 	char *buf = malloc(bufLength);
 	int bytes = 0;
 	int packetSize = 1;
