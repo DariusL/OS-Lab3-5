@@ -17,6 +17,7 @@ int s;
 void dl_exit(int code){
 	shutdown(s, SHUT_RDWR);
 	close(s);
+	unlink("client");
 	exit(code);
 }
 
@@ -28,11 +29,12 @@ void dl_start_client(char *name){
 		dl_exit(1);
 	}
 	addr.sa_family = AF_UNIX;
-	strncpy(addr.sa_data, "server", sizeof(addr.sa_data) - 1);
+	strncpy(addr.sa_data, "client", sizeof(addr.sa_data) - 1);
 	if(bind(s, &addr, sizeof(addr)) != 0){
-		printf("Bind sprogo\n");
+		perror("Bind sprogo\n");
 		dl_exit(1);
 	}
+	strncpy(addr.sa_data, "server", sizeof(addr.sa_data) - 1);
 	if(connect(s, &addr, sizeof(addr)) != 0){
 		printf("Connect sprogo\n");
 		dl_exit(1);
@@ -49,7 +51,7 @@ void dl_send_data(long bytes){
 }
 
 void dl_close_server(){
-	char data = 10;
+	char data = 13;
 	if(send(s, &data, 1, 0) == -1){
 		printf("Klaida uzdarant serveri\n");
 		dl_exit(1);
@@ -58,9 +60,9 @@ void dl_close_server(){
 
 int main(){
 	printf( "(C) 2013 Lapunas Darius, %s\n", __FILE__ );
-	dl_start_client("server");
+	dl_start_client("client");
 	dl_send_data(50);
-	dl_send_data(1024*1024);
+	dl_send_data(100);
 	dl_close_server();
 	dl_exit(0);
 	return 0;

@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-static const int bufLength = 10;
+static const int bufLength = 1024;
 
 int s;
 
@@ -35,6 +35,10 @@ void dl_start_server(char *name){
 		printf("Bindinant sprogo\n");
 		dl_exit(1);
 	}
+	if(listen(s, 20) == -1){
+		printf("listen sprogo\n");
+		dl_exit(1);
+	}
 	printf("socket: %d, kelias: %s\n", s, sa.sa_data);
 }
 
@@ -54,9 +58,10 @@ int dl_receive(){
 				printf("Klaida gaunant paketa\n");
 				return 0;
 			}
+			printf("Gautas %d baitu paketas\n", packetSize);
 			bytes += packetSize;
 			if(packetSize > 0)
-				if(buf[0] == 10){
+				if(buf[packetSize-1] == 13){
 					printf("Gautas pabaigos signalas\n");
 					shutdown(desc, SHUT_RDWR);
 					close(desc);
@@ -72,7 +77,7 @@ int dl_receive(){
 	printf("Gauta %d baitu\n", bytes);
 	shutdown(desc, SHUT_RDWR);
 	close(desc);
-	usleep(10000);
+	usleep(10);
 	return 1;
 }	
 
